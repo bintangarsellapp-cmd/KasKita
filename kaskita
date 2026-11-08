@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KasKita - Web Kas Kelas Transparan v3.0</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS CDN for Direct Excel (.xlsx) Export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center p-4 mb-4 text-slate-800 bg-white rounded-xl shadow-2xl border border-slate-100 max-w-md">
+        <div id="toast-icon" class="inline-flex items-center justify-center flex-shrink-0 w-10 h-10 text-emerald-500 bg-emerald-100 rounded-lg">
+            <i class="fas fa-check-circle text-lg"></i>
+        </div>
+        <div id="toast-msg" class="ml-3 text-sm font-semibold text-slate-700">Notifikasi</div>
+    </div>
+
+    <!-- Header / Navbar -->
+    <header id="main-header" class="hidden bg-white border-b border-slate-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-emerald-600 text-white p-2 rounded-xl shadow-md">
+                    <i class="fas fa-wallet text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-slate-900 leading-tight">KasKita</h1>
+                    <p class="text-xs text-slate-500 font-medium">Manajemen Kas Transparan v3.0</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <div class="bg-slate-100 px-3 py-1.5 rounded-lg flex items-center space-x-2 border border-slate-200">
+                    <i class="fas fa-user-circle text-emerald-600"></i>
+                    <span id="nav-username" class="text-xs font-semibold text-slate-700">Bendahara</span>
+                </div>
+                <button onclick="handleLogout()" class="text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors border border-rose-200">
+                    <i class="fas fa-sign-out-alt mr-1"></i>Keluar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-4">
+
+        <!-- PAGE 1: AUTH (LOGIN & REGISTER) -->
+        <section id="page-auth" class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-slate-100 my-8">
+            <div class="text-center mb-8">
+                <div class="inline-block bg-emerald-100 text-emerald-600 p-4 rounded-2xl mb-3 shadow-inner">
+                    <i class="fas fa-user-shield text-3xl"></i>
+                </div>
+                <h2 id="auth-title" class="text-2xl font-bold text-slate-900">Login Bendahara</h2>
+                <p id="auth-subtitle" class="text-sm text-slate-500 mt-1">Masuk untuk mengelola keuangan kelas</p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Username / Email</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        <input type="text" id="login-user" required placeholder="Masukkan username" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Kata Sandi</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password" id="login-pass" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl shadow-lg shadow-emerald-200 transition-all text-sm flex items-center justify-center space-x-2">
+                    <span>Masuk Aplikasi</span>
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap Bendahara</label>
+                    <input type="text" id="reg-name" required placeholder="Contoh: Budi Santoso" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Username / Email</label>
+                    <input type="text" id="reg-user" required placeholder="Buat username" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Kata Sandi</label>
+                    <input type="password" id="reg-pass" required placeholder="Minimal 6 karakter" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl shadow-lg shadow-emerald-200 transition-all text-sm">
+                    Buat Akun Baru
+                </button>
+            </form>
+
+            <div class="mt-6 text-center border-t border-slate-100 pt-4">
+                <p id="toggle-auth-text" class="text-xs text-slate-500">
+                    Belum punya akun? 
+                    <button type="button" onclick="switchAuthMode('register')" class="text-emerald-600 font-bold hover:underline">Daftar Akun</button>
+                </p>
+            </div>
+        </section>
+
+
+        <!-- PAGE 2: WELCOME & QUOTES KEJUJURAN -->
+        <section id="page-quotes" class="hidden w-full max-w-2xl bg-white p-8 md:p-12 rounded-3xl shadow-2xl border border-slate-100 text-center my-8 relative overflow-hidden">
+            <div class="relative z-10">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl mb-6 shadow-inner transform hover:scale-105 transition-transform">
+                    <i class="fas fa-hand-holding-heart text-4xl"></i>
+                </div>
+
+                <span class="inline-block px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full mb-3 uppercase tracking-wider">Amanah & Kejujuran</span>
+                
+                <h2 id="welcome-user-text" class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-4">
+                    Selamat Datang, Bendahara!
+                </h2>
+
+                <div class="bg-slate-50 p-6 md:p-8 rounded-2xl border border-slate-200 my-6 shadow-sm relative">
+                    <i class="fas fa-quote-left text-2xl text-emerald-300 absolute top-4 left-4"></i>
+                    <p class="text-base md:text-lg text-slate-700 italic font-medium leading-relaxed px-6">
+                        "Kejujuran adalah fondasi utama dalam mengelola uang kas bersama. Transparansi menciptakan kepercayaan, dan integritas menjaga kehormatan seorang pengelola."
+                    </p>
+                    <i class="fas fa-quote-right text-2xl text-emerald-300 absolute bottom-4 right-4"></i>
+                </div>
+
+                <button onclick="goToDashboard()" class="inline-flex items-center space-x-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-3.5 rounded-2xl shadow-xl shadow-emerald-200 hover:shadow-2xl transition-all">
+                    <span>Lanjut ke Penginputan Kas</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+
+        <!-- PAGE 3: DASHBOARD PENGINPUTAN KAS & MANAJEMEN -->
+        <section id="page-dashboard" class="hidden w-full max-w-7xl mx-auto space-y-6 my-4">
+
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 bg-emerald-100 text-emerald-600 rounded-xl">
+                        <i class="fas fa-users text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Total Anggota</p>
+                        <h3 id="stat-total-students" class="text-xl font-bold text-slate-800">0 Mahasiswa</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 bg-emerald-100 text-emerald-600 rounded-xl">
+                        <i class="fas fa-arrow-down text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Total Uang Masuk</p>
+                        <h3 id="stat-total-income" class="text-xl font-bold text-emerald-600">Rp 0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 bg-rose-100 text-rose-600 rounded-xl">
+                        <i class="fas fa-arrow-up text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Total Pengeluaran</p>
+                        <h3 id="stat-total-expense" class="text-xl font-bold text-rose-600">Rp 0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 bg-blue-100 text-blue-600 rounded-xl">
+                        <i class="fas fa-wallet text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Saldo Kas Bersih</p>
+                        <h3 id="stat-total-balance" class="text-xl font-bold text-blue-600">Rp 0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation & Actions -->
+            <div class="bg-white p-2 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-2">
+                <div class="flex flex-wrap gap-1">
+                    <button onclick="switchTab('input')" id="tab-btn-input" class="px-4 py-2.5 rounded-xl font-semibold text-xs transition-all flex items-center space-x-2 bg-emerald-600 text-white shadow-md">
+                        <i class="fas fa-edit"></i>
+                        <span>Input Kas / Transaksi</span>
+                    </button>
+                    <button onclick="switchTab('history')" id="tab-btn-history" class="px-4 py-2.5 rounded-xl font-semibold text-xs transition-all flex items-center space-x-2 text-slate-600 hover:bg-slate-100">
+                        <i class="fas fa-history"></i>
+                        <span>Laporan Transparansi</span>
+                    </button>
+                    <button onclick="switchTab('rekap')" id="tab-btn-rekap" class="px-4 py-2.5 rounded-xl font-semibold text-xs transition-all flex items-center space-x-2 text-slate-600 hover:bg-slate-100">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Rekap Mingguan</span>
+                    </button>
+                    <button onclick="switchTab('students')" id="tab-btn-students" class="px-4 py-2.5 rounded-xl font-semibold text-xs transition-all flex items-center space-x-2 text-slate-600 hover:bg-slate-100">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Data Mahasiswa</span>
+                    </button>
+                </div>
+
+                <button onclick="openExportModal()" class="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2.5 rounded-xl font-semibold text-xs transition-all shadow-md flex items-center justify-center space-x-2">
+                    <i class="fas fa-file-excel text-sm"></i>
+                    <span>Ekspor ke Excel (.xlsx)</span>
+                </button>
+            </div>
+
+
+            <!-- TAB 1: FORM PENGINPUTAN KAS MINGGUAN & PENGELUARAN -->
+            <div id="tab-content-input" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">Form Transaksi Kas Kelas</h3>
+                    <p class="text-xs text-slate-500">Pilih jenis penginputan kas mingguan atau pencatatan pengeluaran uang kas.</p>
+                </div>
+
+                <!-- Input Type Toggle -->
+                <div class="flex space-x-4 border-b border-slate-200 pb-3">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="radio" name="entry-type" value="INCOME_BATCH" checked onchange="toggleEntryTypeMode()" class="text-emerald-600 focus:ring-emerald-500">
+                        <span class="text-xs font-bold text-slate-800">Pembayaran Kas Mingguan (Pemasukan)</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="radio" name="entry-type" value="EXPENSE" onchange="toggleEntryTypeMode()" class="text-rose-600 focus:ring-rose-500">
+                        <span class="text-xs font-bold text-slate-800">Pengeluaran Uang Kas</span>
+                    </label>
+                </div>
+
+                <!-- FORM 1A: BATCH KAS MAHASISWA -->
+                <div id="form-container-income" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Pembayaran Kas</label>
+                            <input type="date" id="input-date" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nominal Standard (Rp)</label>
+                            <input type="number" id="input-nominal-default" value="5000" min="0" step="500" placeholder="5000" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="text-sm font-bold text-slate-800">Daftar Mahasiswa (Centang jika LUNAS):</label>
+                            <div class="flex items-center space-x-2 text-xs">
+                                <button onclick="toggleSelectAllStudents(true)" class="text-emerald-600 font-semibold hover:underline">Pilih Semua</button>
+                                <span class="text-slate-300">|</span>
+                                <button onclick="toggleSelectAllStudents(false)" class="text-slate-500 font-semibold hover:underline">Batalkan Semua</button>
+                            </div>
+                        </div>
+
+                        <div id="student-checkbox-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto p-2 custom-scrollbar">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100 flex justify-end">
+                        <button onclick="saveBatchKas()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-lg shadow-emerald-200 transition-all text-sm flex items-center justify-center space-x-2">
+                            <i class="fas fa-save"></i>
+                            <span>Simpan Data Kas Mingguan</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- FORM 1B: PENGELUARAN KAS -->
+                <div id="form-container-expense" class="space-y-4 hidden">
+                    <form onsubmit="handleSaveExpense(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-rose-50/50 rounded-xl border border-rose-100">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Pengeluaran</label>
+                                <input type="date" id="expense-date" required class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Kategori Pengeluaran</label>
+                                <select id="expense-category" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+                                    <option value="Perlengkapan Kelas">Perlengkapan Kelas (Spidol/Penghapus)</option>
+                                    <option value="Fotokopi & Modul">Fotokopi & Modul Praktikum</option>
+                                    <option value="Acara & Event Kelas">Acara & Event Kelas</option>
+                                    <option value="Konsumsi">Konsumsi</option>
+                                    <option value="Lain-lain">Lain-lain</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Nominal Pengeluaran (Rp)</label>
+                                <input type="number" id="expense-nominal" required min="500" step="500" placeholder="Contoh: 15000" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Keterangan / Keperluan</label>
+                                <input type="text" id="expense-note" required placeholder="Beli spidol boardmarker 2 pcs..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+                            </div>
+                        </div>
+
+                        <div class="pt-2 flex justify-end">
+                            <button type="submit" class="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-lg shadow-rose-200 transition-all text-sm flex items-center justify-center space-x-2">
+                                <i class="fas fa-minus-circle"></i>
+                                <span>Catat Pengeluaran Kas</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+            <!-- TAB 2: LAPORAN TRANSPARANSI (HISTORY TABLE) -->
+            <div id="tab-content-history" class="hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Riwayat & Transparansi Keuangan</h3>
+                        <p class="text-xs text-slate-500">Semua entri transaksi uang masuk dan keluar. Anda dapat mencari, mengedit, atau menghapus entri.</p>
+                    </div>
+                    
+                    <!-- Search & Filters -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="relative flex-grow sm:flex-grow-0">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                <i class="fas fa-search text-xs"></i>
+                            </span>
+                            <input type="text" id="search-history" oninput="renderHistoryTable()" placeholder="Cari nama/keterangan..." class="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 w-full sm:w-44">
+                        </div>
+                        <div>
+                            <select id="filter-status" onchange="renderHistoryTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="ALL">Semua Jenis / Status</option>
+                                <option value="Lunas">Kas Lunas</option>
+                                <option value="Belum Lunas">Kas Belum Lunas</option>
+                                <option value="PENGELUARAN">Khusus Pengeluaran</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            <input type="date" id="filter-date" onchange="renderHistoryTable()" class="px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <button onclick="clearDateFilter()" title="Hapus Filter Tanggal" class="text-slate-400 hover:text-slate-600 px-1 text-xs font-bold">×</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider">
+                                <th class="p-3 border-b">No</th>
+                                <th class="p-3 border-b">Tanggal</th>
+                                <th class="p-3 border-b">Tipe / Kategori</th>
+                                <th class="p-3 border-b">Nama / Keterangan</th>
+                                <th class="p-3 border-b">Nominal</th>
+                                <th class="p-3 border-b">Status</th>
+                                <th class="p-3 border-b text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body" class="text-xs divide-y divide-slate-100 text-slate-700">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <!-- TAB 3: REKAP ABSENSI MINGGUAN & GENERATOR WA -->
+            <div id="tab-content-rekap" class="hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Rekapitulasi Kepatuhan Bayar Kas</h3>
+                        <p class="text-xs text-slate-500">Matriks kedisiplinan absensi kas mahasiswa per minggu.</p>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <label class="text-xs font-semibold text-slate-600">Pilih Bulan:</label>
+                        <input type="month" id="rekap-month" onchange="renderRekapTable()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold">
+                    </div>
+                </div>
+
+                <!-- Rekap Table -->
+                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider">
+                                <th class="p-3 border-b">No</th>
+                                <th class="p-3 border-b">Nama Mahasiswa</th>
+                                <th class="p-3 border-b text-center">W1</th>
+                                <th class="p-3 border-b text-center">W2</th>
+                                <th class="p-3 border-b text-center">W3</th>
+                                <th class="p-3 border-b text-center">W4</th>
+                                <th class="p-3 border-b text-center">Kepatuhan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rekap-table-body" class="text-xs divide-y divide-slate-100 text-slate-700">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Generator Pesan Tagihan WA -->
+                <div class="p-5 bg-emerald-50/60 rounded-2xl border border-emerald-100 space-y-3">
+                    <div class="flex items-center space-x-2 text-emerald-800 font-bold text-sm">
+                        <i class="fab fa-whatsapp text-xl text-emerald-600"></i>
+                        <span>Generator Pesan Penagihan Kas WhatsApp</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Gaya Bahasa Teks Tagihan:</label>
+                            <select id="wa-tone" onchange="generateWaMessage()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg">
+                                <option value="SOPAN">Sopan & Ramah (Standar)</option>
+                                <option value="SANTAI">Kasual & Akrab</option>
+                                <option value="TEGAS">Tegas & Pengingat Deadline</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Preview Teks Tagihan WhatsApp:</label>
+                        <textarea id="wa-preview" rows="4" readonly class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-700 focus:outline-none"></textarea>
+                    </div>
+
+                    <div class="flex justify-end space-x-2">
+                        <button onclick="copyWaMessage()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5">
+                            <i class="fas fa-copy"></i>
+                            <span>Salin Teks WA</span>
+                        </button>
+                        <button onclick="sendWaMessage()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center space-x-1.5">
+                            <i class="fab fa-whatsapp"></i>
+                            <span>Kirim ke WhatsApp</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- TAB 4: MANAJEMEN DATA MAHASISWA -->
+            <div id="tab-content-students" class="hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">Kelola Anggota Kelas</h3>
+                    <p class="text-xs text-slate-500">Tambah, ubah, atau hapus nama mahasiswa anggota kelas.</p>
+                </div>
+
+                <!-- Form Add Student -->
+                <form onsubmit="handleAddStudent(event)" class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="new-student-name" required placeholder="Input Nama Lengkap Mahasiswa Baru..." class="flex-grow px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2 rounded-xl text-xs shadow-md transition-all flex items-center justify-center space-x-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Tambah Anggota</span>
+                    </button>
+                </form>
+
+                <!-- List of Registered Students -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Daftar Anggota Terdaftar</span>
+                        <span id="student-count-badge" class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold">0 Mahasiswa</span>
+                    </div>
+
+                    <div id="student-directory-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="main-footer" class="hidden bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
+        <p>&copy; 2026 KasKita - Transparansi Keuangan Kelas untuk Masa Depan Jujur.</p>
+    </footer>
+
+    <!-- MODAL EDIT DATA TRANSAKSI KAS -->
+    <div id="modal-edit-trx" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-slate-900">Edit Data Transaksi</h3>
+                <button onclick="closeEditTrxModal()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <form id="form-edit-trx" onsubmit="handleSaveEditTrx(event)" class="space-y-3">
+                <input type="hidden" id="edit-trx-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama / Keterangan Transaksi</label>
+                    <input type="text" id="edit-trx-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Transaksi</label>
+                    <input type="date" id="edit-trx-date" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nominal (Rp)</label>
+                    <input type="number" id="edit-trx-nominal" required min="0" step="500" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Status / Jenis Transaksi</label>
+                    <select id="edit-trx-status" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <option value="Lunas">Kas (Lunas)</option>
+                        <option value="Belum Lunas">Kas (Belum Lunas)</option>
+                        <option value="PENGELUARAN">Pengeluaran Kas</option>
+                    </select>
+                </div>
+
+                <div class="pt-3 flex justify-end space-x-2">
+                    <button type="button" onclick="closeEditTrxModal()" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-md">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT NAMA MAHASISWA -->
+    <div id="modal-edit-student" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-100 p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-slate-900">Ubah Nama Mahasiswa</h3>
+                <button onclick="closeEditStudentModal()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <form onsubmit="handleSaveEditStudent(event)" class="space-y-3">
+                <input type="hidden" id="edit-student-old-name">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Mahasiswa Baru</label>
+                    <input type="text" id="edit-student-new-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+
+                <div class="pt-3 flex justify-end space-x-2">
+                    <button type="button" onclick="closeEditStudentModal()" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-md">Simpan Nama</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EKSPOR TO EXCEL CONFIRMATION -->
+    <div id="modal-export" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-8 space-y-5">
+            <div class="flex items-center space-x-3 text-emerald-600 border-b border-slate-100 pb-4">
+                <div class="p-3 bg-emerald-100 rounded-2xl">
+                    <i class="fas fa-file-excel text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 leading-tight">Konfirmasi Ekspor Excel</h3>
+                    <p class="text-xs text-slate-500">Verifikasi transparansi & kebenaran data kas</p>
+                </div>
+            </div>
+
+            <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-amber-800 text-xs space-y-1">
+                <div class="font-bold flex items-center space-x-1.5">
+                    <i class="fas fa-exclamation-circle text-amber-600"></i>
+                    <span>Peringatan Kejujuran Data</span>
+                </div>
+                <p>Silakan periksa kembali seluruh data kas di bawah ini sebelum mengekspor ke file Excel (.xlsx). Pastikan tidak ada kesalahan entri.</p>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs">
+                <div class="flex justify-between font-medium text-slate-600">
+                    <span>Total Baris Transaksi:</span>
+                    <span id="export-summary-count" class="font-bold text-slate-800">0 Data</span>
+                </div>
+                <div class="flex justify-between font-medium text-slate-600">
+                    <span>Total Uang Masuk (Lunas):</span>
+                    <span id="export-summary-income" class="font-bold text-emerald-600">Rp 0</span>
+                </div>
+                <div class="flex justify-between font-medium text-slate-600">
+                    <span>Total Pengeluaran Kas:</span>
+                    <span id="export-summary-expense" class="font-bold text-rose-600">Rp 0</span>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <label class="flex items-start space-x-3 cursor-pointer select-none">
+                    <input type="checkbox" id="chk-export-verify" onchange="toggleExportButton()" class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4">
+                    <span class="text-xs text-slate-700 leading-relaxed font-semibold">
+                        Saya telah memeriksa data kas ini dan menyatakan bahwa seluruh data yang tercantum sudah benar, jujur, serta transparan.
+                    </span>
+                </label>
+            </div>
+
+            <div class="pt-3 flex flex-col sm:flex-row justify-end gap-2">
+                <button type="button" onclick="closeExportModal()" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+                    Batal
+                </button>
+                <button type="button" id="btn-do-export" disabled onclick="executeDirectExcelExport()" class="px-6 py-2.5 rounded-xl bg-slate-300 text-slate-500 cursor-not-allowed text-xs font-bold transition-all shadow-md flex items-center justify-center space-x-2">
+                    <i class="fas fa-download"></i>
+                    <span>Unduh File Excel (.xlsx)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        // LOCALSTORAGE KEYS
+        const STORAGE_KEY_USERS = 'kaskita_users';
+        const STORAGE_KEY_CURRENT_USER = 'kaskita_current_user';
+        const STORAGE_KEY_STUDENTS = 'kaskita_students';
+        const STORAGE_KEY_KAS = 'kaskita_kas_data';
+
+        const defaultStudents = [
+            "Ahmad Fauzi", "Budi Santoso", "Citra Dewi", "Dian Sastro",
+            "Eko Prasetyo", "Fani Fitriani", "Gilang Ramadhan", "Hany Puspita"
+        ];
+
+        let currentUser = null;
+        let students = [];
+        let kasTransactions = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadInitialData();
+            checkAuthSession();
+
+            const today = new Date().toISOString().split('T')[0];
+            const inputDate = document.getElementById('input-date');
+            const expDate = document.getElementById('expense-date');
+            if (inputDate) inputDate.value = today;
+            if (expDate) expDate.value = today;
+
+            const now = new Date();
+            const rekapMonthInput = document.getElementById('rekap-month');
+            if (rekapMonthInput) {
+                const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                rekapMonthInput.value = ym;
+            }
+        });
+
+        function loadInitialData() {
+            const savedStudents = localStorage.getItem(STORAGE_KEY_STUDENTS);
+            if (savedStudents) {
+                students = JSON.parse(savedStudents);
+            } else {
+                students = [...defaultStudents];
+                saveStudents();
+            }
+
+            const savedKas = localStorage.getItem(STORAGE_KEY_KAS);
+            if (savedKas) {
+                kasTransactions = JSON.parse(savedKas);
+            }
+        }
+
+        function saveStudents() {
+            localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(students));
+        }
+
+        function saveKasTransactions() {
+            localStorage.setItem(STORAGE_KEY_KAS, JSON.stringify(kasTransactions));
+        }
+
+        function checkAuthSession() {
+            const savedUser = localStorage.getItem(STORAGE_KEY_CURRENT_USER);
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showQuotesPage();
+            } else {
+                showAuthPage();
+            }
+        }
+
+        function switchAuthMode(mode) {
+            const formLogin = document.getElementById('form-login');
+            const formRegister = document.getElementById('form-register');
+            const authTitle = document.getElementById('auth-title');
+            const authSubtitle = document.getElementById('auth-subtitle');
+            const toggleText = document.getElementById('toggle-auth-text');
+
+            if (mode === 'register') {
+                formLogin.classList.add('hidden');
+                formRegister.classList.remove('hidden');
+                authTitle.innerText = 'Daftar Bendahara';
+                authSubtitle.innerText = 'Buat akun pengelola baru';
+                toggleText.innerHTML = `Sudah punya akun? <button type="button" onclick="switchAuthMode('login')" class="text-emerald-600 font-bold hover:underline">Masuk di sini</button>`;
+            } else {
+                formRegister.classList.add('hidden');
+                formLogin.classList.remove('hidden');
+                authTitle.innerText = 'Login Bendahara';
+                authSubtitle.innerText = 'Masuk untuk mengelola keuangan kelas';
+                toggleText.innerHTML = `Belum punya akun? <button type="button" onclick="switchAuthMode('register')" class="text-emerald-600 font-bold hover:underline">Daftar Akun</button>`;
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const username = document.getElementById('reg-user').value.trim();
+            const pass = document.getElementById('reg-pass').value;
+
+            let users = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
+            if (users.some(u => u.username === username)) {
+                showToast('Username sudah terdaftar!', 'error');
+                return;
+            }
+
+            const newUser = { name, username, pass };
+            users.push(newUser);
+            localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+
+            currentUser = newUser;
+            localStorage.setItem(STORAGE_KEY_CURRENT_USER, JSON.stringify(currentUser));
+            showToast('Registrasi akun berhasil!');
+            showQuotesPage();
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-user').value.trim();
+            const pass = document.getElementById('login-pass').value;
+
+            let users = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
+            const userMatch = users.find(u => u.username === username && u.pass === pass);
+
+            if (userMatch) {
+                currentUser = userMatch;
+                localStorage.setItem(STORAGE_KEY_CURRENT_USER, JSON.stringify(currentUser));
+                showToast('Login berhasil!');
+                showQuotesPage();
+            } else {
+                showToast('Username atau password salah!', 'error');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
+            currentUser = null;
+            showAuthPage();
+            showToast('Anda telah keluar.');
+        }
+
+        function showAuthPage() {
+            document.getElementById('page-auth').classList.remove('hidden');
+            document.getElementById('page-quotes').classList.add('hidden');
+            document.getElementById('page-dashboard').classList.add('hidden');
+            document.getElementById('main-header').classList.add('hidden');
+            document.getElementById('main-footer').classList.add('hidden');
+        }
+
+        function showQuotesPage() {
+            document.getElementById('page-auth').classList.add('hidden');
+            document.getElementById('page-quotes').classList.remove('hidden');
+            document.getElementById('page-dashboard').classList.add('hidden');
+            document.getElementById('main-header').classList.add('hidden');
+            document.getElementById('main-footer').classList.add('hidden');
+
+            document.getElementById('welcome-user-text').innerText = `Selamat Datang, ${currentUser ? currentUser.name : 'Bendahara'}!`;
+        }
+
+        function goToDashboard() {
+            document.getElementById('page-quotes').classList.add('hidden');
+            document.getElementById('page-dashboard').classList.remove('hidden');
+            document.getElementById('main-header').classList.remove('hidden');
+            document.getElementById('main-footer').classList.remove('hidden');
+
+            if (currentUser) {
+                document.getElementById('nav-username').innerText = currentUser.name;
+            }
+
+            renderDashboard();
+        }
+
+        function renderDashboard() {
+            updateStats();
+            renderCheckboxStudentList();
+            renderHistoryTable();
+            renderRekapTable();
+            renderStudentDirectory();
+            generateWaMessage();
+        }
+
+        function switchTab(tabName) {
+            const tabs = ['input', 'history', 'rekap', 'students'];
+            tabs.forEach(t => {
+                const content = document.getElementById(`tab-content-${t}`);
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if (!content || !btn) return;
+                if (t === tabName) {
+                    content.classList.remove('hidden');
+                    btn.className = "px-4 py-2.5 rounded-xl font-semibold text-xs transition-all flex items-center space-x-2 bg-emerald-600 text-white shadow-md";
+                } else {
+                    content.classList.add('hidden');
+                    btn.className = "px-4 py-2.5 rounded-xl font-semibold text-xs transition-all flex items-center space-x-2 text-slate-600 hover:bg-slate-100";
+                }
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total-students').innerText = `${students.length} Mahasiswa`;
+            
+            const totalIncome = kasTransactions
+                .filter(t => t.type !== 'EXPENSE' && t.status === 'Lunas')
+                .reduce((acc, c) => acc + (Number(c.nominal) || 0), 0);
+
+            const totalExpense = kasTransactions
+                .filter(t => t.type === 'EXPENSE')
+                .reduce((acc, c) => acc + (Number(c.nominal) || 0), 0);
+
+            const netBalance = totalIncome - totalExpense;
+
+            document.getElementById('stat-total-income').innerText = `Rp ${totalIncome.toLocaleString('id-ID')}`;
+            document.getElementById('stat-total-expense').innerText = `Rp ${totalExpense.toLocaleString('id-ID')}`;
+            document.getElementById('stat-total-balance').innerText = `Rp ${netBalance.toLocaleString('id-ID')}`;
+        }
+
+        function toggleEntryTypeMode() {
+            const selected = document.querySelector('input[name="entry-type"]:checked').value;
+            const containerIncome = document.getElementById('form-container-income');
+            const containerExpense = document.getElementById('form-container-expense');
+
+            if (selected === 'EXPENSE') {
+                containerIncome.classList.add('hidden');
+                containerExpense.classList.remove('hidden');
+            } else {
+                containerExpense.classList.add('hidden');
+                containerIncome.classList.remove('hidden');
+            }
+        }
+
+        function renderCheckboxStudentList() {
+            const container = document.getElementById('student-checkbox-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (students.length === 0) {
+                container.innerHTML = `<p class="col-span-full text-center text-slate-400 py-4 text-xs">Belum ada anggota kelas.</p>`;
+                return;
+            }
+
+            students.forEach((name, index) => {
+                const card = document.createElement('label');
+                card.className = "flex items-center justify-between p-3 bg-slate-50 hover:bg-emerald-50/50 rounded-xl border border-slate-200 cursor-pointer transition-all select-none";
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" value="${name}" class="student-chk rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4">
+                        <span class="text-xs font-semibold text-slate-700">${index + 1}. ${name}</span>
+                    </div>
+                    <span class="text-[10px] bg-slate-200 text-slate-600 font-bold px-2 py-0.5 rounded-full status-tag">Belum Lunas</span>
+                `;
+
+                const chk = card.querySelector('input');
+                const tag = card.querySelector('.status-tag');
+                chk.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        tag.className = "text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full status-tag";
+                        tag.innerText = "LUNAS";
+                    } else {
+                        tag.className = "text-[10px] bg-slate-200 text-slate-600 font-bold px-2 py-0.5 rounded-full status-tag";
+                        tag.innerText = "Belum Lunas";
+                    }
+                });
+
+                container.appendChild(card);
+            });
+        }
+
+        function toggleSelectAllStudents(select) {
+            const checkboxes = document.querySelectorAll('.student-chk');
+            checkboxes.forEach(chk => {
+                chk.checked = select;
+                chk.dispatchEvent(new Event('change'));
+            });
+        }
+
+        function saveBatchKas() {
+            const dateVal = document.getElementById('input-date').value;
+            const nominalDefault = Number(document.getElementById('input-nominal-default').value) || 0;
+
+            if (!dateVal) {
+                showToast('Pilih tanggal kas terlebih dahulu!', 'error');
+                return;
+            }
+
+            const checkboxes = document.querySelectorAll('.student-chk');
+            let newEntriesCount = 0;
+
+            checkboxes.forEach(chk => {
+                const name = chk.value;
+                const isPaid = chk.checked;
+                
+                kasTransactions.unshift({
+                    id: 'trx_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                    date: dateVal,
+                    name: name,
+                    nominal: isPaid ? nominalDefault : 0,
+                    type: 'INCOME',
+                    status: isPaid ? 'Lunas' : 'Belum Lunas'
+                });
+                newEntriesCount++;
+            });
+
+            saveKasTransactions();
+            renderDashboard();
+            showToast(`Berhasil menyimpan ${newEntriesCount} data kas baru!`);
+            toggleSelectAllStudents(false);
+        }
+
+        function handleSaveExpense(e) {
+            e.preventDefault();
+            const date = document.getElementById('expense-date').value;
+            const category = document.getElementById('expense-category').value;
+            const nominal = Number(document.getElementById('expense-nominal').value) || 0;
+            const note = document.getElementById('expense-note').value.trim();
+
+            if (!date || nominal <= 0 || !note) {
+                showToast('Lengkapi data pengeluaran dengan benar!', 'error');
+                return;
+            }
+
+            kasTransactions.unshift({
+                id: 'trx_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                date: date,
+                name: `[${category}] ${note}`,
+                nominal: nominal,
+                type: 'EXPENSE',
+                status: 'PENGELUARAN'
+            });
+
+            saveKasTransactions();
+            renderDashboard();
+            document.getElementById('expense-note').value = '';
+            document.getElementById('expense-nominal').value = '';
+            showToast('Pengeluaran kas berhasil dicatat!');
+        }
+
+        function clearDateFilter() {
+            document.getElementById('filter-date').value = '';
+            renderHistoryTable();
+        }
+
+        function renderHistoryTable() {
+            const tbody = document.getElementById('history-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const searchVal = document.getElementById('search-history').value.toLowerCase();
+            const filterStatus = document.getElementById('filter-status').value;
+            const filterDate = document.getElementById('filter-date').value;
+
+            const filteredData = kasTransactions.filter(item => {
+                const matchName = item.name.toLowerCase().includes(searchVal);
+                const matchStatus = (filterStatus === 'ALL') || 
+                                    (filterStatus === 'PENGELUARAN' && item.type === 'EXPENSE') || 
+                                    (item.status === filterStatus);
+                const matchDate = (!filterDate) || (item.date === filterDate);
+                return matchName && matchStatus && matchDate;
+            });
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400 italic">Tidak ada transaksi yang cocok.</td></tr>`;
+                return;
+            }
+
+            filteredData.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+
+                const isExpense = item.type === 'EXPENSE';
+                const isLunas = item.status === 'Lunas';
+
+                let badge = '';
+                if (isExpense) {
+                    badge = `<span class="bg-rose-100 text-rose-800 font-bold px-2.5 py-1 rounded-full text-[10px]"><i class="fas fa-arrow-up mr-1"></i>Pengeluaran</span>`;
+                } else if (isLunas) {
+                    badge = `<span class="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full text-[10px]"><i class="fas fa-check-circle mr-1"></i>Lunas</span>`;
+                } else {
+                    badge = `<span class="bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-full text-[10px]"><i class="fas fa-times-circle mr-1"></i>Belum Lunas</span>`;
+                }
+
+                const typeLabel = isExpense ? `<span class="text-rose-600 font-bold">Pengeluaran</span>` : `<span class="text-emerald-600 font-bold">Pemasukan Kas</span>`;
+
+                tr.innerHTML = `
+                    <td class="p-3 text-slate-500 font-medium">${idx + 1}</td>
+                    <td class="p-3 font-semibold text-slate-700">${item.date}</td>
+                    <td class="p-3">${typeLabel}</td>
+                    <td class="p-3 font-bold text-slate-900">${item.name}</td>
+                    <td class="p-3 font-semibold ${isExpense ? 'text-rose-600' : 'text-slate-700'}">Rp ${(Number(item.nominal) || 0).toLocaleString('id-ID')}</td>
+                    <td class="p-3">${badge}</td>
+                    <td class="p-3 text-center space-x-1">
+                        <button onclick="openEditTrxModal('${item.id}')" class="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors" title="Edit Transaksi">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <button onclick="deleteKasEntry('${item.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition-colors" title="Hapus Transaksi">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openEditTrxModal(trxId) {
+            const trx = kasTransactions.find(t => t.id === trxId);
+            if (!trx) return;
+
+            document.getElementById('edit-trx-id').value = trx.id;
+            document.getElementById('edit-trx-name').value = trx.name;
+            document.getElementById('edit-trx-date').value = trx.date;
+            document.getElementById('edit-trx-nominal').value = trx.nominal;
+            document.getElementById('edit-trx-status').value = trx.status;
+
+            document.getElementById('modal-edit-trx').classList.remove('hidden');
+        }
+
+        function closeEditTrxModal() {
+            document.getElementById('modal-edit-trx').classList.add('hidden');
+        }
+
+        function handleSaveEditTrx(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-trx-id').value;
+            const name = document.getElementById('edit-trx-name').value.trim();
+            const date = document.getElementById('edit-trx-date').value;
+            const nominal = Number(document.getElementById('edit-trx-nominal').value) || 0;
+            const status = document.getElementById('edit-trx-status').value;
+
+            const idx = kasTransactions.findIndex(t => t.id === id);
+            if (idx !== -1) {
+                const type = status === 'PENGELUARAN' ? 'EXPENSE' : 'INCOME';
+                kasTransactions[idx] = { id, name, date, nominal, status, type };
+                saveKasTransactions();
+                renderDashboard();
+                closeEditTrxModal();
+                showToast('Transaksi berhasil diperbarui!');
+            }
+        }
+
+        function deleteKasEntry(id) {
+            if (confirm('Yakin menghapus data transaksi ini?')) {
+                kasTransactions = kasTransactions.filter(t => t.id !== id);
+                saveKasTransactions();
+                renderDashboard();
+                showToast('Transaksi berhasil dihapus.');
+            }
+        }
+
+        function renderRekapTable() {
+            const tbody = document.getElementById('rekap-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const monthVal = document.getElementById('rekap-month').value; // e.g. "2026-11"
+
+            students.forEach((name, idx) => {
+                const studentTrx = kasTransactions.filter(t => t.name === name && t.date.startsWith(monthVal));
+                
+                const w1 = studentTrx.some(t => {
+                    const day = parseInt(t.date.split('-')[2]);
+                    return day >= 1 && day <= 7 && t.status === 'Lunas';
+                });
+                const w2 = studentTrx.some(t => {
+                    const day = parseInt(t.date.split('-')[2]);
+                    return day >= 8 && day <= 14 && t.status === 'Lunas';
+                });
+                const w3 = studentTrx.some(t => {
+                    const day = parseInt(t.date.split('-')[2]);
+                    return day >= 15 && day <= 21 && t.status === 'Lunas';
+                });
+                const w4 = studentTrx.some(t => {
+                    const day = parseInt(t.date.split('-')[2]);
+                    return day >= 22 && t.status === 'Lunas';
+                });
+
+                const countPaid = [w1, w2, w3, w4].filter(Boolean).length;
+                const percentage = Math.round((countPaid / 4) * 100);
+
+                const iconCheck = `<i class="fas fa-check text-emerald-600 font-bold"></i>`;
+                const iconCross = `<i class="fas fa-times text-rose-400"></i>`;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-3 text-slate-500 font-medium">${idx + 1}</td>
+                    <td class="p-3 font-bold text-slate-900">${name}</td>
+                    <td class="p-3 text-center">${w1 ? iconCheck : iconCross}</td>
+                    <td class="p-3 text-center">${w2 ? iconCheck : iconCross}</td>
+                    <td class="p-3 text-center">${w3 ? iconCheck : iconCross}</td>
+                    <td class="p-3 text-center">${w4 ? iconCheck : iconCross}</td>
+                    <td class="p-3 text-center">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${percentage === 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                            ${percentage}% (${countPaid}/4)
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function generateWaMessage() {
+            const tone = document.getElementById('wa-tone').value;
+            const unpaidList = kasTransactions
+                .filter(t => t.type !== 'EXPENSE' && t.status === 'Belum Lunas')
+                .map(t => t.name);
+
+            const uniqueUnpaid = [...new Set(unpaidList)];
+
+            let msg = "";
+            if (tone === 'SANTAI') {
+                msg = `Halo teman-teman! 🖐🏻\nSekadar mengingatkan untuk pembayaran kas kelas minggu ini ya. Bagi yang belum lunas:\n`;
+                uniqueUnpaid.forEach((n, i) => msg += `${i + 1}. ${n}\n`);
+                msg += `\nBisa langsung bayar ke bendahara ya. Terima kasih! 🙏🏻`;
+            } else if (tone === 'TEGAS') {
+                msg = `[PEMBERITAHUAN PENTING KAS KELAS]\nMohon perhatian bagi nama-nama berikut yang masih memiliki tunggakan kas kelas:\n`;
+                uniqueUnpaid.forEach((n, i) => msg += `${i + 1}. ${n}\n`);
+                msg += `\nDiharapkan segera melunasi pembayaran paling lambat akhir minggu ini untuk transparansi keuangan kelas. Terima kasih.`;
+            } else {
+                msg = `Assalamu’alaikum / Selamat Pagi teman-teman 🙏\nBerikut kami lampirkan daftar mahasiswa yang belum melunasi kas kelas minggu ini:\n\n`;
+                uniqueUnpaid.forEach((n, i) => msg += `${i + 1}. ${n}\n`);
+                msg += `\nMohon kesediaannya untuk segera menyetorkan ke bendahara kelas demi kelancaran kegiatan bersama. Terima kasih atas kerja samanya. 😊`;
+            }
+
+            document.getElementById('wa-preview').value = msg;
+        }
+
+        function copyWaMessage() {
+            const txt = document.getElementById('wa-preview');
+            txt.select();
+            document.execCommand('copy');
+            showToast('Teks tagihan WA berhasil disalin!');
+        }
+
+        function sendWaMessage() {
+            const text = encodeURIComponent(document.getElementById('wa-preview').value);
+            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+        }
+
+        function handleAddStudent(e) {
+            e.preventDefault();
+            const input = document.getElementById('new-student-name');
+            const name = input.value.trim();
+
+            if (!name) return;
+            if (students.includes(name)) {
+                showToast('Nama ini sudah terdaftar!', 'error');
+                return;
+            }
+
+            students.push(name);
+            saveStudents();
+            input.value = '';
+            renderDashboard();
+            showToast('Anggota kelas berhasil ditambahkan!');
+        }
+
+        function renderStudentDirectory() {
+            const list = document.getElementById('student-directory-list');
+            const countBadge = document.getElementById('student-count-badge');
+            
+            if (countBadge) countBadge.innerText = `${students.length} Mahasiswa`;
+            if (!list) return;
+
+            list.innerHTML = '';
+            students.forEach((name, index) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl";
+                div.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">${index + 1}</span>
+                        <span class="text-xs font-semibold text-slate-700">${name}</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button onclick="openEditStudentModal('${name}')" class="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-xs transition-colors" title="Edit Nama">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteStudent('${name}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs transition-colors" title="Hapus Anggota">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function openEditStudentModal(oldName) {
+            document.getElementById('edit-student-old-name').value = oldName;
+            document.getElementById('edit-student-new-name').value = oldName;
+            document.getElementById('modal-edit-student').classList.remove('hidden');
+        }
+
+        function closeEditStudentModal() {
+            document.getElementById('modal-edit-student').classList.add('hidden');
+        }
+
+        function handleSaveEditStudent(e) {
+            e.preventDefault();
+            const oldName = document.getElementById('edit-student-old-name').value;
+            const newName = document.getElementById('edit-student-new-name').value.trim();
+
+            if (!newName) return;
+            const idx = students.indexOf(oldName);
+            if (idx !== -1) {
+                students[idx] = newName;
+                saveStudents();
+                kasTransactions.forEach(t => { if (t.name === oldName) t.name = newName; });
+                saveKasTransactions();
+                renderDashboard();
+                closeEditStudentModal();
+                showToast('Nama mahasiswa berhasil diubah!');
+            }
+        }
+
+        function deleteStudent(name) {
+            if (confirm(`Hapus "${name}" dari daftar kelas?`)) {
+                students = students.filter(s => s !== name);
+                saveStudents();
+                renderDashboard();
+                showToast('Anggota berhasil dihapus.');
+            }
+        }
+
+        function openExportModal() {
+            if (kasTransactions.length === 0) {
+                showToast('Belum ada data untuk diekspor!', 'error');
+                return;
+            }
+
+            const totalCount = kasTransactions.length;
+            const totalIncome = kasTransactions
+                .filter(t => t.type !== 'EXPENSE' && t.status === 'Lunas')
+                .reduce((acc, c) => acc + (Number(c.nominal) || 0), 0);
+            const totalExpense = kasTransactions
+                .filter(t => t.type === 'EXPENSE')
+                .reduce((acc, c) => acc + (Number(c.nominal) || 0), 0);
+
+            document.getElementById('export-summary-count').innerText = `${totalCount} Entri Transaksi`;
+            document.getElementById('export-summary-income').innerText = `Rp ${totalIncome.toLocaleString('id-ID')}`;
+            document.getElementById('export-summary-expense').innerText = `Rp ${totalExpense.toLocaleString('id-ID')}`;
+
+            const chk = document.getElementById('chk-export-verify');
+            chk.checked = false;
+            toggleExportButton();
+
+            document.getElementById('modal-export').classList.remove('hidden');
+        }
+
+        function closeExportModal() {
+            document.getElementById('modal-export').classList.add('hidden');
+        }
+
+        function toggleExportButton() {
+            const chk = document.getElementById('chk-export-verify');
+            const btn = document.getElementById('btn-do-export');
+
+            if (chk.checked) {
+                btn.disabled = false;
+                btn.className = "px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-200 cursor-pointer flex items-center justify-center space-x-2";
+            } else {
+                btn.disabled = true;
+                btn.className = "px-6 py-2.5 rounded-xl bg-slate-300 text-slate-500 cursor-not-allowed text-xs font-bold transition-all shadow-md flex items-center justify-center space-x-2";
+            }
+        }
+
+        function executeDirectExcelExport() {
+            try {
+                // Sheet 1: Transaksi
+                const rows1 = kasTransactions.map((t, idx) => ({
+                    "No": idx + 1,
+                    "Tanggal": t.date,
+                    "Tipe Transaksi": t.type === 'EXPENSE' ? 'Pengeluaran' : 'Pemasukan',
+                    "Nama / Keterangan": t.name,
+                    "Nominal (Rp)": Number(t.nominal) || 0,
+                    "Status": t.status
+                }));
+                const ws1 = XLSX.utils.json_to_sheet(rows1);
+                ws1['!cols'] = [{ wch: 6 }, { wch: 14 }, { wch: 16 }, { wch: 30 }, { wch: 15 }, { wch: 16 }];
+
+                // Sheet 2: Rekap Absensi
+                const monthVal = document.getElementById('rekap-month').value;
+                const rows2 = students.map((name, idx) => {
+                    const studentTrx = kasTransactions.filter(t => t.name === name && t.date.startsWith(monthVal));
+                    const w1 = studentTrx.some(t => parseInt(t.date.split('-')[2]) <= 7 && t.status === 'Lunas');
+                    const w2 = studentTrx.some(t => parseInt(t.date.split('-')[2]) >= 8 && parseInt(t.date.split('-')[2]) <= 14 && t.status === 'Lunas');
+                    const w3 = studentTrx.some(t => parseInt(t.date.split('-')[2]) >= 15 && parseInt(t.date.split('-')[2]) <= 21 && t.status === 'Lunas');
+                    const w4 = studentTrx.some(t => parseInt(t.date.split('-')[2]) >= 22 && t.status === 'Lunas');
+                    
+                    return {
+                        "No": idx + 1,
+                        "Nama Mahasiswa": name,
+                        "Minggu 1": w1 ? 'LUNAS' : 'BELUM',
+                        "Minggu 2": w2 ? 'LUNAS' : 'BELUM',
+                        "Minggu 3": w3 ? 'LUNAS' : 'BELUM',
+                        "Minggu 4": w4 ? 'LUNAS' : 'BELUM',
+                    };
+                });
+                const ws2 = XLSX.utils.json_to_sheet(rows2);
+
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, ws1, "Riwayat Transaksi");
+                XLSX.utils.book_append_sheet(workbook, ws2, "Rekap Presensi Kas");
+
+                const dateStr = new Date().toISOString().split('T')[0];
+                XLSX.writeFile(workbook, `KasKita_Laporan_${dateStr}.xlsx`);
+
+                closeExportModal();
+                showToast("File Excel (.xlsx) berhasil diunduh!");
+            } catch (err) {
+                console.error(err);
+                showToast("Gagal mengunduh Excel: " + err.message, "error");
+            }
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = msg;
+            if (type === 'error') {
+                toastIcon.className = "inline-flex items-center justify-center flex-shrink-0 w-10 h-10 text-rose-500 bg-rose-100 rounded-lg";
+                toastIcon.innerHTML = `<i class="fas fa-exclamation-circle text-lg"></i>`;
+            } else {
+                toastIcon.className = "inline-flex items-center justify-center flex-shrink-0 w-10 h-10 text-emerald-500 bg-emerald-100 rounded-lg";
+                toastIcon.innerHTML = `<i class="fas fa-check-circle text-lg"></i>`;
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
